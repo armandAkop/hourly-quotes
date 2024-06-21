@@ -31,3 +31,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
     - run: pnpm install
+    - name: Execute script
+      run: pnpm start
+      env:
+        VIDEO_ID: "this video ID"
+
