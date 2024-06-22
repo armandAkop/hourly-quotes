@@ -35,5 +35,5 @@ jobs:
     - name: Execute script
       run: pnpm start
       env:
-        VIDEO_ID: "this video ID"
+        VIDEO_ID: "snYPkhkCWTA"
 
