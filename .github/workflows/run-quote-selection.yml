@@ -4,6 +4,7 @@
 name: Run quote selection
 
 on:
+  workflow_dispatch:
   push:
     branches: ['main']
 
