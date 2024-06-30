@@ -32,12 +32,10 @@ jobs:
         name: Install dependencies
       - run: pnpm build
         name: Build
-      - name: Print context
-        run: echo '${{ toJSON(github) }}'
       - name: Execute script
         run: pnpm start
         env:
           VIDEO_ID: ${{ vars.VIDEO_ID }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: $${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GOOGLE_REFRESH_TOKEN: $${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
