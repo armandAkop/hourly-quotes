@@ -8,7 +8,7 @@ on:
     branches: ['main']
 
 jobs:
-  build:
+  Select-Quote:
     runs-on: ubuntu-latest
 
     strategy:
