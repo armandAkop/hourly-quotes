@@ -65,7 +65,7 @@ async function main() {
       textOriginal: winnersQuote,
       authorChannelUrl: winnersChannel,
     } = winningComment;
-    const title = `Hourly quote brought to you by ${winnersDisplayName}`;
+    const title = `Quote of the hour brought to you by ${winnersDisplayName}`;
     const footerText =
       'Remember to leave your favorite quote for a chance to be displayed at the top of the hour!';
     const description = `And the winner is...  ${winnersChannel}   "${winnersQuote}"\n\n${footerText}`;
