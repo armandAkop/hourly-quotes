@@ -8,6 +8,14 @@ const {
   GOOGLE_REFRESH_TOKEN,
 } = process.env;
 
+// Description has a max limit of 5000 characters, comments can be 10,000 so let's play it safe
+function isSuitableCommentLength(comment: youtube_v3.Schema$CommentThread) {
+  return (
+    comment.snippet?.topLevelComment?.snippet?.textOriginal &&
+    comment.snippet?.topLevelComment?.snippet?.textOriginal?.length < 4500
+  );
+}
+
 async function main() {
   const authClient = new google.auth.OAuth2(
     GOOGLE_CLIENT_ID,
@@ -22,47 +30,58 @@ async function main() {
     id: [VIDEO_ID],
   });
 
-  if (videoResponse.data.items) {
-    const video = videoResponse.data.items[0];
-    const commentCount =
-      videoResponse.data.items[0]?.statistics?.commentCount ?? 0;
-    const commentsResponse = await youtube.commentThreads.list({
-      part: ['id', 'snippet'],
-      videoId: VIDEO_ID,
-      maxResults: 100,
-    });
-    const comments = commentsResponse.data.items || [];
-    const winningComment =
-      comments[Math.floor(Math.random() * comments.length)].snippet
-        ?.topLevelComment?.snippet;
-
-    if (!winningComment) {
-      console.log('Unable to select winning comment');
-      process.exit(0);
-    }
-
-    const {
-      authorDisplayName: winnersDisplayName,
-      textOriginal: winnersQuote,
-      authorChannelUrl: winnersChannel,
-    } = winningComment;
-    const title = `Hourly quote brought to you by ${winnersDisplayName}`;
-    const description = `"${winnersQuote}"\n\nAnd the winner is...  ${winnersChannel}!\nRemember to leave your favorite quote for a chance to be displayed at the top of the hour!`;
-
-    const update = await youtube.videos.update({
-      part: ['snippet'],
-      requestBody: {
-        id: VIDEO_ID,
-        snippet: {
-          ...video.snippet,
-          title,
-          description,
-        },
-      },
-    });
-
+  if (videoResponse.data.items?.length === 0) {
+    console.log(`No video found for videoId=${VIDEO_ID}`);
     process.exit(0);
   }
+  const video = videoResponse.data.items?.shift()!!;
+  const commentsResponse = await youtube.commentThreads.list({
+    part: ['id', 'snippet'],
+    videoId: VIDEO_ID,
+    maxResults: 100,
+  });
+
+  const comments = (commentsResponse.data.items || []).filter(
+    isSuitableCommentLength
+  );
+
+  if (comments.length === 0) {
+    console.log('No comments found');
+    process.exit(0);
+  }
+
+  const winningComment =
+    comments[Math.floor(Math.random() * comments.length)].snippet
+      ?.topLevelComment?.snippet;
+
+  if (!winningComment) {
+    console.log('Unable to select winning comment');
+    process.exit(0);
+  }
+
+  const {
+    authorDisplayName: winnersDisplayName,
+    textOriginal: winnersQuote,
+    authorChannelUrl: winnersChannel,
+  } = winningComment;
+  const title = `Hourly quote brought to you by ${winnersDisplayName}`;
+  const footerText =
+    'Remember to leave your favorite quote for a chance to be displayed at the top of the hour!';
+  const description = `And the winner is...  ${winnersChannel}   "${winnersQuote}"\n\n${footerText}`;
+
+  await youtube.videos.update({
+    part: ['snippet'],
+    requestBody: {
+      id: VIDEO_ID,
+      snippet: {
+        ...video.snippet,
+        title,
+        description,
+      },
+    },
+  });
+
+  process.exit(0);
 }
 
 main();
