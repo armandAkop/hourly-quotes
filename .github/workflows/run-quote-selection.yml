@@ -5,8 +5,8 @@ name: Run quote selection
 
 on:
   workflow_dispatch:
-  push:
-    branches: ['main']
+  schedule:
+    - cron: 0 * * * *
 
 jobs:
   Select-Quote:
