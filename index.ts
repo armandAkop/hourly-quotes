@@ -32,17 +32,24 @@ async function main() {
       maxResults: 100,
     });
     const comments = commentsResponse.data.items || [];
-    console;
     const winningComment =
-      comments[Math.floor(Math.random() * comments.length)];
+      comments[Math.floor(Math.random() * comments.length)].snippet
+        ?.topLevelComment?.snippet;
 
-    const winnersDisplayName =
-      winningComment.snippet?.topLevelComment?.snippet?.authorDisplayName;
+    if (!winningComment) {
+      console.log('Unable to select winning comment');
+      process.exit(0);
+    }
+
+    const {
+      authorDisplayName: winnersDisplayName,
+      textOriginal: winnersQuote,
+      authorChannelUrl: winnersChannel,
+    } = winningComment;
     const title = `Hourly quote brought to you by ${winnersDisplayName}`;
+    const description = `"${winnersQuote}"\n\nAnd the winner is...  ${winnersChannel}!\nRemember to leave your favorite quote for a chance to be displayed at the top of the hour!`;
 
-    const description = `"${winningComment.snippet?.topLevelComment?.snippet?.textOriginal}"\n\nCongratulations to the winner, ${winnersDisplayName}!\nRemember to leave your favorite quote for a chance to be displayed at the top of the hour!`;
-
-    const updated = await youtube.videos.update({
+    const update = await youtube.videos.update({
       part: ['snippet'],
       requestBody: {
         id: VIDEO_ID,
@@ -54,7 +61,6 @@ async function main() {
       },
     });
 
-    // console.log('Updated!', updated);
     process.exit(0);
   }
 }
