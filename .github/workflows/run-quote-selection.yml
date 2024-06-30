@@ -32,6 +32,8 @@ jobs:
         name: Install dependencies
       - run: pnpm build
         name: Build
+      - name: Print context
+        run: echo '${{ toJSON(github) }}'
       - name: Execute script
         run: pnpm start
         env:
