@@ -1,4 +1,4 @@
-declare global {
+declare module global {
   namespace NodeJS {
     interface ProcessEnv {
       [key: string]: string | undefined;

@@ -1,40 +1,19 @@
-import express from 'express';
 import { google, youtube_v3 } from 'googleapis';
-import './process-env-d';
 
+const VIDEO_ID = process.env.VIDEO_ID as string;
 const {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI,
   GOOGLE_REFRESH_TOKEN,
-  VIDEO_ID,
 } = process.env;
-const scopes = ['https://www.googleapis.com/auth/youtube.force-ssl'];
-const authClient = new google.auth.OAuth2(
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  GOOGLE_REDIRECT_URI
-);
-const app = express();
-
-app.get('/auth/code', async (req, res) => {
-  const code = req.query.code as string;
-  const { tokens } = await authClient.getToken(code);
-  res.json({ ...tokens });
-});
-
-app.listen(3000);
-
-function getRefreshToken() {
-  console.log(
-    authClient.generateAuthUrl({
-      scope: scopes,
-      access_type: 'offline',
-    })
-  );
-}
 
 async function main() {
+  const authClient = new google.auth.OAuth2(
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    GOOGLE_REDIRECT_URI
+  );
   authClient.setCredentials({ refresh_token: GOOGLE_REFRESH_TOKEN });
   const opts: youtube_v3.Options = { version: 'v3', auth: authClient };
   const youtube = google.youtube(opts);
@@ -61,9 +40,7 @@ async function main() {
       winningComment.snippet?.topLevelComment?.snippet?.authorDisplayName;
     const title = `Hourly quote brought to you by ${winnersDisplayName}`;
 
-    const description = `"${
-      winningComment.snippet?.topLevelComment?.snippet?.textOriginal
-    }"\n\nThank you for those wise words, ${winnersDisplayName}!\nAnd thank you to the other ${commentCount} philosophers!\n Updated at ${new Date().toISOString()}`;
+    const description = `"${winningComment.snippet?.topLevelComment?.snippet?.textOriginal}"\n\nCongratulations to the winner, ${winnersDisplayName}!\nRemember to leave your favorite quote for a chance to be displayed at the top of the hour!`;
 
     const updated = await youtube.videos.update({
       part: ['snippet'],
